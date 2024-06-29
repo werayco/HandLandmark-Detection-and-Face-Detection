@@ -12,6 +12,7 @@ cap = cv.VideoCapture(0)
 
 while True:
     is_true, frame = cap.read()
+    
     if not is_true:
         break
 
@@ -42,10 +43,10 @@ while True:
     # Display the frame
     cv.imshow("Frame", frame)
 
-    # Break the loop on 'x' key press
+
     if cv.waitKey(1) & 0xFF == ord('x'):
         break
 
-# Release the capture and close the windows
+
 cap.release()
 cv.destroyAllWindows()
