@@ -2,51 +2,44 @@ import mediapipe.python.solutions.hands as hands
 import mediapipe.python.solutions.drawing_utils as mp_drawing
 import cv2 as cv
 
-face_cascade = cv.CascadeClassifier(r"face.xml")
 
-mp_hands = hands
+class face:
+    def __init__(self,filename:str):
+        self.filename = filename
 
-hands_detector = mp_hands.Hands()
+        self.face_cascade = cv.CascadeClassifier(self.filename)
+        self.mp_hands = hands
+        self.hands_detector = self.mp_hands.Hands()
+        self.cap = cv.VideoCapture(0)
 
-cap = cv.VideoCapture(0)
+    def looper(self):
 
-while True:
-    is_true, frame = cap.read()
-    
-    if not is_true:
-        break
+        while True:
+            is_true, frame = self.cap.read()
+            if not is_true:
+                break
 
-    # Convert the frame to grayscale
-    gray_img = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
+            gray_img = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
+            img2rgb = cv.cvtColor(frame, cv.COLOR_BGR2RGB)
+            results = self.hands_detector.process(img2rgb)
 
-    # Convert the frame to RGB
-    img2rgb = cv.cvtColor(frame, cv.COLOR_BGR2RGB)
-
-    # Process the frame for hand detection
-    results = hands_detector.process(img2rgb)
-
-    if results.multi_hand_landmarks:
-
-        for hand_landmarks in results.multi_hand_landmarks:
-
-            for id, landmark in enumerate(hand_landmarks.landmark):
-                
-                print(id, landmark)
-            mp_drawing.draw_landmarks(frame, hand_landmarks, mp_hands.HAND_CONNECTIONS)
-
-    # Detect faces in the grayscale image
-    face_list = face_cascade.detectMultiScale(gray_img, scaleFactor=1.1, minNeighbors=4)
-
-    for (x, y, w, h) in face_list:
-        cv.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
-
-    # Display the frame
-    cv.imshow("Frame", frame)
+            if results.multi_hand_landmarks:
+                for hand_landmarks in results.multi_hand_landmarks:
+                    for id, landmark in enumerate(hand_landmarks.landmark):
+                        print(id, landmark)
+                    mp_drawing.draw_landmarks(frame, hand_landmarks, self.mp_hands.HAND_CONNECTIONS)
+            face_list = self.face_cascade.detectMultiScale(gray_img, scaleFactor=1.1, minNeighbors=4)
+            for (x, y, w, h) in face_list:
+                cv.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
+            
+            cv.imshow("Frame", frame)
+            if cv.waitKey(1) & 0xFF == ord('x'):
+                break
 
 
-    if cv.waitKey(1) & 0xFF == ord('x'):
-        break
+        self.cap.release()
+        cv.destroyAllWindows()
 
 
-cap.release()
-cv.destroyAllWindows()
+ob = face(r"face.xml")
+ob.looper()
